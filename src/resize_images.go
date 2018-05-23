@@ -5,10 +5,29 @@ import (
 	"log"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"github.com/disintegration/imaging"
 )
+
+type empty struct{}
+type semaphore chan empty
+
+// acquire n resources
+func (s semaphore) P(n int) {
+	e := empty{}
+	for i := 0; i < n; i++ {
+		s <- e
+	}
+}
+
+// release n resources
+func (s semaphore) V(n int) {
+	for i := 0; i < n; i++ {
+		<-s
+	}
+}
 
 func main() {
 	var srcFolderSpec = "/data3/home/chmafu/AI_in_Medicine_Clinical_Imaging_Classification/data//train/*.jpeg"
@@ -19,7 +38,8 @@ func main() {
 	}
 	fmt.Printf("Found %d files to resize\n", len(files))
 
-	sem := make(chan struct{}, 8)
+	sem := make(chan struct{}, runtime.NumCPU())
+
 	var wg sync.WaitGroup
 	for _, f := range files {
 		wg.Add(1)
