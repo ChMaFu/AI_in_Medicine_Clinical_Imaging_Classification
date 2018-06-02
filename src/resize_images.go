@@ -40,7 +40,7 @@ func main() {
 
 	var wg sync.WaitGroup
 	sem := make(semaphore, runtime.NumCPU())
-	for _, f := range files {
+	for _, f := range files[:100] {
 		wg.Add(1)
 		sem.P(1)
 		go func(file string, dstFolder string) {
