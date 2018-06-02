@@ -38,16 +38,13 @@ func main() {
 	}
 	fmt.Printf("Found %d files to resize\n", len(files))
 
-	sem := make(chan struct{}, runtime.NumCPU())
-
 	var wg sync.WaitGroup
+	sem := make(semaphore, runtime.NumCPU())
 	for _, f := range files {
 		wg.Add(1)
+		sem.P(1)
 		go func(file string, dstFolder string) {
-			sem <- struct{}{}
-			defer func() { <-sem }()
-			defer wg.Done()
-
+			defer sem.V(1)
 			go resizeImage(file, dstFolder)
 		}(f, dstFolder)
 	}
