@@ -41,10 +41,10 @@ func main() {
 func processImages(files []string, outFolder string) {
 	defer wg.Done()
 
-	for _, f := range files {
+	for k, f := range files {
+		fmt.Printf("Resizing file number %d, path: %q\n", k, f)
 		resizeImage(f, outFolder)
 	}
-
 }
 
 func resizeImage(file string, outFolder string) {
@@ -59,7 +59,7 @@ func resizeImage(file string, outFolder string) {
 	var filename string
 	_, filename = filepath.Split(file)
 	var outfile = path.Join(outFolder, filename)
-	fmt.Printf("Writing file: %q\n", outfile)
+
 	err = imaging.Save(img, outfile)
 	if err != nil {
 		log.Fatalf("failed to save image: %v", err)
