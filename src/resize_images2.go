@@ -42,7 +42,9 @@ func processImages(files []string, outFolder string) {
 	defer wg.Done()
 
 	for k, f := range files {
-		fmt.Printf("Resizing file number %d/%d, path: %q\n", k, len(files), f)
+		if (k % 100) == 0 {
+			fmt.Printf("Resizing file number %d/%d, path: %q\n", k, len(files), f)
+		}
 		resizeImage(f, outFolder)
 	}
 }
