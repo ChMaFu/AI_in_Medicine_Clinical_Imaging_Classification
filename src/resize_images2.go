@@ -5,6 +5,7 @@ import (
 	"log"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"github.com/disintegration/imaging"
@@ -20,17 +21,33 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Found %d files to resize\n", len(files))
+	var fileCount = len(files)
+	fmt.Printf("Found %d files to resize\n", fileCount)
 
-	for _, f := range files[:100] {
+	var batchSize = fileCount / runtime.NumCPU()
+	var firstIndex = 0
+	var lastIndex = batchSize
+
+	for i := 1; i <= runtime.NumCPU(); i++ {
 		wg.Add(1)
-		go resizeImage(f, dstFolder)
+		go processImages(files[firstIndex:lastIndex], dstFolder)
+
+		firstIndex = lastIndex + 1
+		lastIndex = lastIndex + batchSize
 	}
 	wg.Wait()
 }
 
-func resizeImage(file string, outFolder string) {
+func processImages(files []string, outFolder string) {
 	defer wg.Done()
+
+	for _, f := range files {
+		resizeImage(f, outFolder)
+	}
+
+}
+
+func resizeImage(file string, outFolder string) {
 	src, err := imaging.Open(file)
 	if err != nil {
 		log.Fatalf("failed to open image: %v", err)
