@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/disintegration/imaging"
 )
@@ -16,6 +17,9 @@ var wg sync.WaitGroup
 func main() {
 	var srcFolderSpec = "/data3/home/chmafu/AI_in_Medicine_Clinical_Imaging_Classification/data//train/*.jpeg"
 	var dstFolder = "/data3/home/chmafu/AI_in_Medicine_Clinical_Imaging_Classification/data/train-resized-256/"
+
+	start := time.Now()
+	fmt.Printf("Start time: %s\n", start.Format(time.RFC3339))
 
 	files, err := filepath.Glob(srcFolderSpec)
 	if err != nil {
@@ -36,6 +40,12 @@ func main() {
 		lastIndex = lastIndex + batchSize
 	}
 	wg.Wait()
+	end := time.Now()
+	fmt.Printf("End time: %s\n", end.Format(time.RFC3339))
+
+	elapsed := end.Sub(start)
+	fmt.Printf("Execution duration: %d\n", elapsed)
+
 }
 
 func processImages(files []string, outFolder string) {
